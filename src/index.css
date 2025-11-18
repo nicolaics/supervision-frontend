@@ -39,8 +39,8 @@ All colors MUST be HSL.
     --radius: 0.75rem;
 
     /* Performance grade colors */
-    --grade-s: 142 76% 36%;
-    --grade-s-bg: 142 50% 95%;
+    --grade-s: 217 91% 60%;
+    --grade-s-bg: 217 50% 95%;
     --grade-a: 142 60% 45%;
     --grade-a-bg: 142 40% 97%;
     --grade-b: 45 93% 47%;
@@ -104,8 +104,8 @@ All colors MUST be HSL.
     --ring: 197 71% 50%;
 
     /* Performance grade colors for dark mode */
-    --grade-s: 142 76% 50%;
-    --grade-s-bg: 142 40% 15%;
+    --grade-s: 217 91% 65%;
+    --grade-s-bg: 217 40% 15%;
     --grade-a: 142 60% 55%;
     --grade-a-bg: 142 35% 17%;
     --grade-b: 45 93% 55%;

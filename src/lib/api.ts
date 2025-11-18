@@ -53,6 +53,14 @@ export interface ApiResponse<T> {
   data: T | null;
 }
 
+export type DatasetName = 'content-performance' | 'player-history';
+
+export interface DatasetStatusInfo {
+  dataset_name: DatasetName;
+  records_count: number;
+  last_updated_at: string | null;
+}
+
 /**
  * Content Performance KPI from backend
  */
@@ -160,12 +168,22 @@ export interface CsvUploadResponse {
   totalRecords: number;
   recordsProcessed: number;
   errors: string[] | null;
+  databaseRecords: number;
+  lastUpdatedAt: string | null;
+}
+
+export interface UploadCsvOptions {
+  mode?: 'replace' | 'append';
 }
 
 /**
  * Upload Content Performance CSV file using FormData (multipart/form-data)
  */
-export async function uploadContentPerformanceCSV(file: File): Promise<CsvUploadResponse> {
+export async function uploadContentPerformanceCSV(
+  file: File,
+  options: UploadCsvOptions = {}
+): Promise<CsvUploadResponse> {
+  const mode = options.mode ?? 'replace';
   // Check file size (warn if very large)
   if (file.size > 50 * 1024 * 1024) { // 50MB
     console.warn("Large file detected, upload may take longer");
@@ -175,6 +193,7 @@ export async function uploadContentPerformanceCSV(file: File): Promise<CsvUpload
     // Use FormData for efficient file upload (multipart/form-data)
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('mode', mode);
     
     const response = await apiClient.post<ApiResponse<CsvUploadResponse>>(
       '/api/process-csv/content-perf',
@@ -188,7 +207,22 @@ export async function uploadContentPerformanceCSV(file: File): Promise<CsvUpload
     
     const result = response.data;
     
+    // Debug logging to help diagnose issues
+    console.log('Content Performance CSV Upload Response:', {
+      success: result.success,
+      status_code: result.status_code,
+      message: result.message,
+      hasData: !!result.data,
+      data: result.data,
+    });
+    
     if (!result.success || !result.data) {
+      console.error('Upload failed - Response details:', {
+        success: result.success,
+        hasData: !!result.data,
+        message: result.message,
+        fullResponse: result,
+      });
       throw new Error(result.message || 'Failed to upload content performance CSV');
     }
 
@@ -218,7 +252,11 @@ export async function uploadContentPerformanceCSV(file: File): Promise<CsvUpload
 /**
  * Upload Player History CSV file using FormData (multipart/form-data)
  */
-export async function uploadPlayerHistoryCSV(file: File): Promise<CsvUploadResponse> {  
+export async function uploadPlayerHistoryCSV(
+  file: File,
+  options: UploadCsvOptions = {}
+): Promise<CsvUploadResponse> {  
+  const mode = options.mode ?? 'replace';
   // Check file size (warn if very large)
   if (file.size > 50 * 1024 * 1024) { // 50MB
     console.warn("Large file detected, upload may take longer");
@@ -228,6 +266,7 @@ export async function uploadPlayerHistoryCSV(file: File): Promise<CsvUploadRespo
     // Use FormData for efficient file upload (multipart/form-data)
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('mode', mode);
     
     const response = await apiClient.post<ApiResponse<CsvUploadResponse>>(
       '/api/process-csv/player-history',
@@ -241,7 +280,22 @@ export async function uploadPlayerHistoryCSV(file: File): Promise<CsvUploadRespo
     
     const result = response.data;
     
+    // Debug logging to help diagnose issues
+    console.log('Player History CSV Upload Response:', {
+      success: result.success,
+      status_code: result.status_code,
+      message: result.message,
+      hasData: !!result.data,
+      data: result.data,
+    });
+    
     if (!result.success || !result.data) {
+      console.error('Upload failed - Response details:', {
+        success: result.success,
+        hasData: !!result.data,
+        message: result.message,
+        fullResponse: result,
+      });
       throw new Error(result.message || 'Failed to upload player history CSV');
     }
 
@@ -263,6 +317,31 @@ export async function uploadPlayerHistoryCSV(file: File): Promise<CsvUploadRespo
       }
       
       throw new Error(`Failed to upload player history CSV: ${statusText}. ${message}`);
+    }
+    throw error;
+  }
+}
+
+/**
+ * Fetch dataset status information (record counts, last updated)
+ */
+export async function fetchDatasetStatus(dataset: DatasetName): Promise<DatasetStatusInfo> {
+  try {
+    const response = await apiClient.get<ApiResponse<DatasetStatusInfo>>('/api/dataset-status', {
+      params: { dataset },
+    });
+
+    const result = response.data;
+
+    if (!result.success || !result.data) {
+      throw new Error(result.message || 'Failed to fetch dataset status');
+    }
+
+    return result.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const message = error.response?.data?.message || error.message;
+      throw new Error(`Failed to fetch dataset status: ${message}`);
     }
     throw error;
   }

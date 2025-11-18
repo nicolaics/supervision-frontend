@@ -88,7 +88,7 @@ export const AttentionEntranceScatter = ({
       </CardHeader>
       <CardContent className="pt-6">
         <ResponsiveContainer width="100%" height={400}>
-          <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+          <ScatterChart className="p-4">
             <CartesianGrid
               strokeDasharray="3 3"
               stroke="hsl(var(--border))"
@@ -119,6 +119,8 @@ export const AttentionEntranceScatter = ({
                 angle: -90,
                 position: "insideLeft",
                 fill: "hsl(var(--foreground))",
+                dx: -10,
+                dy: 30,
               }}
             />
             <Tooltip content={<CustomTooltip />} />
