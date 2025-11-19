@@ -13,7 +13,6 @@ Executive-facing dashboard for the Space Vision signage interview task. The appl
    - npm 10 or newer.
 2. **Install dependencies**
    ```powershell
-   cd D:\Work\SpaceVision\InterviewTasks\frontend
    npm install
    ```
 3. **Configure the backend endpoint**
